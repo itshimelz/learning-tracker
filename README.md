@@ -25,9 +25,46 @@ An interactive study planner and diagnostics dashboard for the **12-Week Android
 
 ---
 
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](public/screenshots/dashboard.png)
+
+### Today's Focus
+![Today's Focus](public/screenshots/today.png)
+
+### Weekly Plan
+![Weekly Plan](public/screenshots/weekly-plan.png)
+
+### Resource Library
+![Resources](public/screenshots/resources.png)
+
+### DSA Tracker
+![DSA Tracker](public/screenshots/dsa-tracker.png)
+
+---
+
+## ⚡ Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/itshimelz/learning-tracker.git
+cd learning-tracker
+
+# Install dependencies
+pnpm install
+
+# Run the development server
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+---
+
 ## 🤖 Built with Antigravity
 
-This application was engineered through an autonomous, step-by-step pair-programming pipeline with **Antigravity**:
+This application was engineered through an autonomous, step-by-step pair-programming pipeline with **Antigravity** (Google DeepMind's agentic AI coding assistant):
 1. **Curriculum Parsing**: Extracted and parsed structured raw markdown study syllabi into type-safe JSON templates.
 2. **State Design**: Established a custom local storage sync schema for tracking problems, study tasks, resources, and dates.
 3. **Responsive UI & Polish**: Applied premium glassmorphism accents, transitions, and layout refinements for mobile-friendly viewports.
