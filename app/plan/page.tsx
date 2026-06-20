@@ -20,7 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store/context";
 import { useProgressCalc } from "@/hooks/use-progress-calc";
-import { getCalendarDateFromIndex, getDayNameFromIndex, cn } from "@/lib/utils";
+import { getCalendarDateFromIndex, getDayNameFromIndex, cn, formatMarkdown } from "@/lib/utils";
 
 export default function FullPlanPage() {
   const { state, dispatch, isHydrated } = useStore();
@@ -107,7 +107,7 @@ export default function FullPlanPage() {
                               Week {week.weekNumber}
                             </span>
                             <span className="text-sm font-bold text-foreground hover:text-primary transition-colors">
-                              {week.theme.replace(/\*\*/g, "")}
+                              {formatMarkdown(week.theme)}
                             </span>
                           </div>
                           
@@ -220,10 +220,12 @@ export default function FullPlanPage() {
                                             task.completed ? "text-muted-foreground line-through" : "text-foreground"
                                           )}
                                         >
-                                          {task.title
-                                            .replace(/^DSA Focus:\s*/i, "")
-                                            .replace(/^Deep Dive:\s*/i, "")
-                                            .replace(/^Capstone Task:\s*/i, "")}
+                                          {formatMarkdown(
+                                            task.title
+                                              .replace(/^DSA Focus:\s*/i, "")
+                                              .replace(/^Deep Dive:\s*/i, "")
+                                              .replace(/^Capstone Task:\s*/i, "")
+                                          )}
                                         </label>
                                         <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
                                           {task.category === "dsa"

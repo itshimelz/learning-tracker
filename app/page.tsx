@@ -23,8 +23,40 @@ import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { useStore } from "@/lib/store/context";
 import { useProgressCalc } from "@/hooks/use-progress-calc";
 import { useStreakTracker } from "@/hooks/use-streak-tracker";
-import { cn, getCalendarDateFromIndex, getDayNameFromIndex } from "@/lib/utils";
+import { cn, getCalendarDateFromIndex, getDayNameFromIndex, formatMarkdown } from "@/lib/utils";
 import { toast } from "sonner";
+
+interface TodayClass {
+  code: string;
+  title: string;
+  time: string;
+  room: string;
+  color: string;
+}
+
+const UNIVERSITY_ROUTINE: Record<string, TodayClass[]> = {
+  Mon: [
+    { code: "CSE 323", title: "Cryptography & Cybersecurity", time: "08:30 AM - 10:00 AM", room: "H107", color: "from-blue-50/90 to-blue-100/90 border-blue-200 text-blue-800 dark:from-blue-950/40 dark:to-blue-900/40 dark:border-blue-800/50 dark:text-blue-300" },
+    { code: "CSE 413", title: "Natural Language Processing", time: "10:00 AM - 11:30 AM", room: "A602", color: "from-purple-50/90 to-purple-100/90 border-purple-200 text-purple-800 dark:from-purple-950/40 dark:to-purple-900/40 dark:border-purple-800/50 dark:text-purple-300" },
+    { code: "GED 403", title: "Industrial & Operational Mgmt", time: "11:30 AM - 01:00 PM", room: "A603", color: "from-amber-50/90 to-amber-100/90 border-amber-200 text-amber-800 dark:from-amber-950/40 dark:to-amber-900/40 dark:border-amber-800/50 dark:text-amber-300" },
+    { code: "GED 407", title: "Professional Ethics & Env Protection", time: "01:30 PM - 03:00 PM", room: "H105", color: "from-emerald-50/90 to-emerald-100/90 border-emerald-200 text-emerald-800 dark:from-emerald-950/40 dark:to-emerald-900/40 dark:border-emerald-800/50 dark:text-emerald-300" },
+  ],
+  Tue: [
+    { code: "GED 407", title: "Professional Ethics & Env Protection", time: "01:30 PM - 03:00 PM", room: "K106", color: "from-emerald-50/90 to-emerald-100/90 border-emerald-200 text-emerald-800 dark:from-emerald-950/40 dark:to-emerald-900/40 dark:border-emerald-800/50 dark:text-emerald-300" },
+    { code: "GED 403", title: "Industrial & Operational Mgmt", time: "03:00 PM - 04:30 PM", room: "K106", color: "from-amber-50/90 to-amber-100/90 border-amber-200 text-amber-800 dark:from-amber-950/40 dark:to-amber-900/40 dark:border-amber-800/50 dark:text-amber-300" },
+  ],
+  Wed: [
+    { code: "CSE 323", title: "Cryptography & Cybersecurity", time: "08:30 AM - 10:00 AM", room: "H107", color: "from-blue-50/90 to-blue-100/90 border-blue-200 text-blue-800 dark:from-blue-950/40 dark:to-blue-900/40 dark:border-blue-800/50 dark:text-blue-300" },
+    { code: "CSE 413", title: "Natural Language Processing", time: "10:00 AM - 11:30 AM", room: "A-605", color: "from-purple-50/90 to-purple-100/90 border-purple-200 text-purple-800 dark:from-purple-950/40 dark:to-purple-900/40 dark:border-purple-800/50 dark:text-purple-300" },
+    { code: "CSE 414", title: "Natural Language Processing Lab", time: "01:30 PM - 03:30 PM", room: "K102", color: "from-pink-50/90 to-pink-100/90 border-pink-200 text-pink-800 dark:from-pink-950/40 dark:to-pink-900/40 dark:border-pink-800/50 dark:text-pink-300" },
+  ],
+  Thu: [
+    { code: "CSE 400A", title: "Final Year Project/Thesis", time: "06:00 PM - 08:30 PM", room: "Thesis", color: "from-cyan-50/90 to-cyan-100/90 border-cyan-200 text-cyan-800 dark:from-cyan-950/40 dark:to-cyan-900/40 dark:border-cyan-800/50 dark:text-cyan-300" },
+  ],
+  Fri: [],
+  Sat: [],
+  Sun: [],
+};
 
 export default function DashboardPage() {
   const { state, dispatch, isHydrated } = useStore();
@@ -124,6 +156,54 @@ export default function DashboardPage() {
         )}
       </div>
 
+      {/* University Routine Banner */}
+      {(() => {
+        const classesToday = UNIVERSITY_ROUTINE[todayInfo.dayName] || [];
+        const isClassFree = classesToday.length === 0;
+
+        return (
+          <div className="p-4 rounded-xl border border-border/80 bg-card/25 backdrop-blur-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 hover:border-border/60 hover:shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
+                <HugeiconsIcon icon={Calendar01Icon} className="size-5" />
+              </div>
+              <div className="flex flex-col leading-snug">
+                <span className="text-[10px] text-muted-foreground font-mono uppercase font-bold tracking-wider">
+                  University Routine
+                </span>
+                <h3 className="text-sm font-bold text-foreground">
+                  {isClassFree ? "No classes scheduled today! Focus on your study plan." : `Today's Schedule (${classesToday.length} Class${classesToday.length > 1 ? "es" : ""})`}
+                </h3>
+              </div>
+            </div>
+            
+            {!isClassFree ? (
+              <div className="flex flex-wrap gap-2 items-center">
+                {classesToday.map((cls, idx) => (
+                  <div
+                    key={cls.code + idx}
+                    className={cn(
+                      "px-2.5 py-1 rounded-md border text-[10px] font-semibold bg-gradient-to-br flex items-center gap-1.5 shadow-2xs",
+                      cls.color
+                    )}
+                  >
+                    <span className="font-bold">{cls.code}</span>
+                    <span className="opacity-40">|</span>
+                    <span className="font-mono text-[9px]">{cls.time.split(" - ")[0]}</span>
+                    <span className="opacity-40">|</span>
+                    <span className="font-mono text-[9px]">Room {cls.room}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 text-[10px] font-bold uppercase tracking-wider font-mono">
+                🎉 Class-Free Study Day
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Core Stats Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Week progress card */}
@@ -138,10 +218,20 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold font-sans">
               Week {todayInfo.weekNumber} <span className="text-xs font-normal text-muted-foreground">/ 12</span>
             </div>
-            <p className="text-[10px] text-muted-foreground truncate font-mono mt-1">
-              Theme: {currentWeekData?.theme ? currentWeekData.theme.replace(/\*\*/g, "") : "Loading..."}
-            </p>
-            <Progress value={(todayInfo.weekNumber / 12) * 100} className="h-1.5 mt-3 bg-muted" />
+            <div className="text-[10px] text-muted-foreground font-mono mt-1 flex items-center justify-between gap-2 overflow-hidden">
+              <span className="truncate flex-1">
+                Theme: {currentWeekData?.theme ? formatMarkdown(currentWeekData.theme) : "Loading..."}
+              </span>
+              {todayInfo.hasStarted && currentWeekData && (
+                <span className="font-bold text-primary shrink-0">
+                  {progress.weekProgress[todayInfo.weekId]?.percent || 0}% Done
+                </span>
+              )}
+            </div>
+            <Progress 
+              value={todayInfo.hasStarted ? (progress.weekProgress[todayInfo.weekId]?.percent || 0) : 0} 
+              className="h-1.5 mt-3 bg-muted" 
+            />
           </CardContent>
         </Card>
 
@@ -280,7 +370,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3.5">
-                  {todayTasks.map((task) => (
+                  {todayTasks.map((task, index) => (
                     <div
                       key={task.id}
                       className={cn(
@@ -313,16 +403,22 @@ export default function DashboardPage() {
                             task.completed ? "text-muted-foreground line-through" : "text-foreground"
                           )}
                         >
-                          {task.title}
+                          {formatMarkdown(task.title)}
                         </label>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
-                          {task.category === "dsa"
-                            ? "Block 1 — DSA (45m)"
-                            : task.category === "deep-dive"
-                              ? "Block 2 — Core Deep Dive (1h15m)"
-                              : task.category === "capstone"
-                                ? "Block 3 — Capstone (2h)"
-                                : "Block 4 — Rev Eng (30m)"}
+                          Block {index + 1} — {
+                            task.category === "dsa"
+                              ? "DSA (45m)"
+                              : task.category === "deep-dive"
+                                ? "Core Deep Dive (1h15m)"
+                                : task.category === "capstone"
+                                  ? "Capstone (2h)"
+                                  : task.category === "reverse-engineering"
+                                    ? "Rev Eng (30m)"
+                                    : task.category === "mock"
+                                      ? "Mock Practice (45m)"
+                                      : "Rest (0m)"
+                          }
                         </span>
                       </div>
                     </div>
@@ -347,7 +443,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Current Milestone Card */}
-          <Card className="bg-card/20 border-border/80">
+          <Card className="bg-card/20 border-border/80 transition-all duration-300 hover:border-border/60">
             <CardHeader className="pb-3 border-b border-border/40">
               <CardTitle className="text-sm font-bold">Capstone Milestone</CardTitle>
               <CardDescription className="text-xs">Current week theme & build goals</CardDescription>
@@ -362,7 +458,7 @@ export default function DashboardPage() {
                     Week Theme
                   </span>
                   <span className="text-xs font-semibold text-foreground">
-                    {currentWeekData?.theme ? currentWeekData.theme.replace(/\*\*/g, "") : "Loading..."}
+                    {currentWeekData?.theme ? formatMarkdown(currentWeekData.theme) : "Loading..."}
                   </span>
                 </div>
               </div>
@@ -371,12 +467,12 @@ export default function DashboardPage() {
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
                   <HugeiconsIcon icon={BadgeCheckIcon} className="size-5" />
                 </div>
-                <div className="flex flex-col gap-0.5 leading-snug">
+                <div className="flex flex-col gap-0.5 leading-snug flex-1">
                   <span className="text-[10px] text-muted-foreground font-mono uppercase font-bold tracking-wider">
                     Build Goal
                   </span>
                   <span className="text-xs font-semibold text-foreground">
-                    {currentWeekData?.capstoneMilestone || "No capstone task listed."}
+                    {currentWeekData?.capstoneMilestone ? formatMarkdown(currentWeekData.capstoneMilestone) : "No capstone task listed."}
                   </span>
                 </div>
               </div>
@@ -386,7 +482,7 @@ export default function DashboardPage() {
                 <div className="border-t border-border/40 pt-4 flex items-center justify-between">
                   <div className="flex flex-col leading-snug">
                     <span className="text-xs font-semibold text-foreground">Weekly Mock Interview</span>
-                    <span className="text-[9px] text-muted-foreground font-mono">Saturday schedule</span>
+                    <span className="text-[9px] text-muted-foreground font-mono">Friday Mock schedule</span>
                   </div>
                   <Button
                     variant={currentWeekData.mockCompleted ? "secondary" : "outline"}

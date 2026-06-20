@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import * as React from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -67,4 +68,45 @@ export function getDayNameFromIndex(startDateStr: string, weekNumber: number, da
   } catch (e) {
     return "Sat";
   }
+}
+
+export function formatMarkdown(text: string | undefined | null): React.ReactNode {
+  if (!text) return "";
+  
+  const boldParts = text.split(/\*\*([^*]+)\*\*/g);
+  const result: React.ReactNode[] = [];
+  
+  boldParts.forEach((part, boldIndex) => {
+    const isBold = boldIndex % 2 === 1;
+    if (isBold) {
+      result.push(
+        React.createElement(
+          "strong",
+          { key: `b-${boldIndex}`, className: "font-bold text-foreground" },
+          part
+        )
+      );
+    } else {
+      const codeParts = part.split(/`([^`]+)`/g);
+      codeParts.forEach((subPart, codeIndex) => {
+        const isCode = codeIndex % 2 === 1;
+        if (isCode) {
+          result.push(
+            React.createElement(
+              "code",
+              {
+                key: `c-${boldIndex}-${codeIndex}`,
+                className: "font-mono bg-muted-foreground/10 text-foreground px-1.5 py-0.5 rounded text-[0.85em] font-semibold border border-border/40"
+              },
+              subPart
+            )
+          );
+        } else {
+          result.push(subPart);
+        }
+      });
+    }
+  });
+  
+  return React.createElement(React.Fragment, null, ...result);
 }

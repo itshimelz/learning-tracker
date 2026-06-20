@@ -29,7 +29,7 @@ import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/store/context";
 import { useTimer } from "@/lib/store/timer-context";
 import { useProgressCalc } from "@/hooks/use-progress-calc";
-import { cn, getCalendarDateFromIndex, getDayNameFromIndex } from "@/lib/utils";
+import { cn, getCalendarDateFromIndex, getDayNameFromIndex, formatMarkdown } from "@/lib/utils";
 
 // Pomodoro Timer Subcomponent
 interface BlockTimerProps {
@@ -339,7 +339,7 @@ export default function TodayFocusPage() {
             )}
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {currentWeekData?.theme ? currentWeekData.theme.replace(/\*\*/g, "") : "Loading..."}
+            {currentWeekData?.theme ? formatMarkdown(currentWeekData.theme) : "Loading..."}
           </h1>
         </div>
 
@@ -443,7 +443,7 @@ export default function TodayFocusPage() {
                           task.completed ? "text-muted-foreground line-through" : "text-foreground"
                         )}
                       >
-                        {task.title}
+                        {formatMarkdown(task.title)}
                       </label>
                     </div>
                   </div>
@@ -485,7 +485,7 @@ export default function TodayFocusPage() {
                 }
               />
               <label htmlFor={task.id} className="text-xs font-semibold cursor-pointer select-none">
-                {task.title}
+                {formatMarkdown(task.title)}
               </label>
             </div>
           ))}
@@ -534,7 +534,7 @@ export default function TodayFocusPage() {
                         {blockNumStr} — {isDsa ? "DSA" : isDeepDive ? "Core Theory" : isCapstone ? "Capstone Build" : isRevEng ? "Reflections" : "Mock Practice"} ({blockDuration}m)
                       </span>
                       <h2 className={cn("text-sm font-bold text-foreground", task.completed && "line-through text-muted-foreground")}>
-                        {task.title}
+                        {formatMarkdown(task.title)}
                       </h2>
                     </div>
                   </div>

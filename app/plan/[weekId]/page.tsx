@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store/context";
 import { useProgressCalc } from "@/hooks/use-progress-calc";
-import { getCalendarDateFromIndex, getDayNameFromIndex, cn } from "@/lib/utils";
+import { getCalendarDateFromIndex, getDayNameFromIndex, cn, formatMarkdown } from "@/lib/utils";
 
 interface WeekDetailPageProps {
   params: React.Usable<{
@@ -88,7 +88,7 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
               Week {weekData.weekNumber} Workspace
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {weekData.theme.replace(/\*\*/g, "")}
+              {formatMarkdown(weekData.theme)}
             </h1>
           </div>
 
@@ -202,10 +202,12 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
                             task.completed ? "text-muted-foreground line-through" : "text-foreground"
                           )}
                         >
-                          {task.title
-                            .replace(/^DSA Focus:\s*/i, "")
-                            .replace(/^Deep Dive:\s*/i, "")
-                            .replace(/^Capstone Task:\s*/i, "")}
+                          {formatMarkdown(
+                            task.title
+                              .replace(/^DSA Focus:\s*/i, "")
+                              .replace(/^Deep Dive:\s*/i, "")
+                              .replace(/^Capstone Task:\s*/i, "")
+                          )}
                         </label>
                         <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
                           {task.category === "dsa"

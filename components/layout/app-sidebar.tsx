@@ -7,6 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   DashboardBrowsingIcon,
   Calendar03Icon,
+  Calendar01Icon,
   Task02Icon,
   CodeIcon,
   BookOpen02Icon,
@@ -53,6 +54,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: "Full Plan",
       url: "/plan",
       icon: Task02Icon,
+    },
+    {
+      title: "Class Routine",
+      url: "/routine",
+      icon: Calendar01Icon,
     },
     {
       title: "DSA Tracker",

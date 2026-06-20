@@ -55,7 +55,10 @@ export function HeatmapGrid() {
       {/* Main Grid Wrapper with horizontal scrolling for responsiveness */}
       <div className="flex items-start gap-3 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin">
         {/* Row Headers (Day Names) - Fixed on the left */}
-        <div className="flex flex-col gap-[7.5px] text-[10px] font-medium text-muted-foreground/60 font-mono pt-6 shrink-0">
+        <div className="flex flex-col gap-[7.5px] text-[10px] font-medium text-muted-foreground/60 font-mono shrink-0">
+          <div className="h-[14px] flex items-center justify-start text-[9px] font-bold text-muted-foreground/45 uppercase select-none">
+            Week
+          </div>
           {orderedWeekDayNames.map((day, idx) => (
             <div key={day + idx} className="h-3.5 flex items-center justify-start leading-none select-none">
               {idx % 2 === 0 ? day : ""}
@@ -68,7 +71,7 @@ export function HeatmapGrid() {
           {weeks.map((week) => (
             <div key={week.id} className="flex flex-col gap-[7.5px] items-center shrink-0">
               {/* Column header (Week number) */}
-              <span className="text-[9px] font-semibold text-muted-foreground/70 font-mono h-[14px] flex items-center justify-center">
+              <span className="text-[8px] font-extrabold text-muted-foreground/60 font-mono h-[14px] flex items-center justify-center select-none tracking-tighter">
                 W{week.weekNumber}
               </span>
               

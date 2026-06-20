@@ -30,6 +30,9 @@ An interactive study planner and diagnostics dashboard for the **12-Week Android
 ### Dashboard
 ![Dashboard](public/screenshots/dashboard.png)
 
+### Class Routine
+![Class Routine](public/screenshots/routine.png)
+
 ### Today's Focus
 ![Today's Focus](public/screenshots/today.png)
 
