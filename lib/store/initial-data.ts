@@ -189,9 +189,12 @@ export const initialAppState: AppState = {
     theme: "dark",
     dailyHours: 4.5,
     startDate: (() => {
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      return tomorrow.toISOString().split("T")[0]
+      // Default to the most recent Saturday (today or preceding Saturday)
+      const d = new Date();
+      const day = d.getDay(); // 0 (Sun) to 6 (Sat)
+      const distance = (day + 1) % 7; // distance to Saturday
+      d.setDate(d.getDate() - distance);
+      return d.toISOString().split("T")[0];
     })(),
   },
 };

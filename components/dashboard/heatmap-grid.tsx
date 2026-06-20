@@ -75,14 +75,14 @@ export function HeatmapGrid() {
               {/* Vertical stack of day cells */}
               <div className="flex flex-col gap-[7.5px]">
                 {Array.from({ length: 7 }).map((_, dayIndex) => {
-                  const day = week.days[dayIndex];
+                  const dayName = orderedWeekDayNames[dayIndex];
+                  const day = week.days.find((d) => d.dayOfWeek === dayName);
                   if (!day) return null;
 
-                  const dayName = orderedWeekDayNames[dayIndex];
                   const totalTasks = day.tasks.length;
                   const completedTasks = day.tasks.filter((t) => t.completed).length;
                   const ratio = totalTasks > 0 ? completedTasks / totalTasks : 0;
-                  const isRest = dayIndex === 1; // Day 2 of study week is always index 1
+                  const isRest = day.tasks.some((t) => t.category === "rest");
 
                   return (
                     <Tooltip key={dayIndex}>

@@ -168,8 +168,10 @@ export default function TodayFocusPage() {
   }, [state.plan, todayInfo.weekId]);
 
   const selectedDayData = React.useMemo(() => {
-    return currentWeekData?.days[selectedDayIndex];
-  }, [currentWeekData, selectedDayIndex]);
+    if (!currentWeekData) return undefined;
+    const selectedDayName = orderedWeekDayNames[selectedDayIndex];
+    return currentWeekData.days.find((d) => d.dayOfWeek === selectedDayName);
+  }, [currentWeekData, selectedDayIndex, orderedWeekDayNames]);
 
   // Suggested resources matching this week
   const weekResources = React.useMemo(() => {
@@ -226,7 +228,8 @@ export default function TodayFocusPage() {
   };
 
   const isSelectedDayCompleted = (idx: number) => {
-    const day = currentWeekData?.days[idx];
+    const dayName = orderedWeekDayNames[idx];
+    const day = currentWeekData?.days.find((d) => d.dayOfWeek === dayName);
     if (!day || day.tasks.length === 0) return false;
     return day.tasks.every((t) => t.completed);
   };
@@ -234,6 +237,16 @@ export default function TodayFocusPage() {
   const selectedDayDateStr = React.useMemo(() => {
     return getCalendarDateFromIndex(state.settings.startDate, todayInfo.weekNumber, selectedDayIndex);
   }, [state.settings.startDate, todayInfo.weekNumber, selectedDayIndex]);
+
+  const isMockOnlyDay = React.useMemo(() => {
+    if (!selectedDayData || selectedDayData.tasks.length === 0) return false;
+    return selectedDayData.tasks.every((t) => t.category === "mock");
+  }, [selectedDayData]);
+
+  const isRestOnlyDay = React.useMemo(() => {
+    if (!selectedDayData || selectedDayData.tasks.length === 0) return false;
+    return selectedDayData.tasks.every((t) => t.category === "rest");
+  }, [selectedDayData]);
 
   if (!isHydrated) {
     return (
@@ -380,7 +393,7 @@ export default function TodayFocusPage() {
       </div>
 
       {/* Weekend Checkpoint Views */}
-      {selectedDayIndex === 0 ? (
+      {isMockOnlyDay ? (
         <Card className="bg-card/20 border-border/80 p-6 flex flex-col gap-6">
           <div className="flex items-start gap-4 border-b border-border/40 pb-4">
             <div className="p-3 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
@@ -447,7 +460,7 @@ export default function TodayFocusPage() {
             </div>
           </div>
         </Card>
-      ) : selectedDayIndex === 1 ? (
+      ) : isRestOnlyDay ? (
         <Card className="bg-card/20 border-border/80 p-6 flex flex-col gap-4 text-center items-center py-12 max-w-xl mx-auto">
           <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 w-fit">
             <HugeiconsIcon icon={BadgeCheckIcon} className="size-8" />
@@ -486,9 +499,10 @@ export default function TodayFocusPage() {
             const isDeepDive = task.category === "deep-dive";
             const isCapstone = task.category === "capstone";
             const isRevEng = task.category === "reverse-engineering";
+            const isMock = task.category === "mock";
 
             // Grab study blocks duration
-            const blockDuration = isDsa ? 45 : isDeepDive ? 75 : isCapstone ? 120 : 30;
+            const blockDuration = isDsa ? 45 : isDeepDive ? 75 : isCapstone ? 120 : isMock ? 45 : 30;
             const blockNumStr = `Block ${index + 1}`;
             
             // Collect titles for Obsidian clipboards
@@ -517,7 +531,7 @@ export default function TodayFocusPage() {
                     />
                     <div className="flex flex-col gap-0.5 leading-snug">
                       <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
-                        {blockNumStr} — {isDsa ? "DSA" : isDeepDive ? "Core Theory" : isCapstone ? "Capstone Build" : "Reflections"} ({blockDuration}m)
+                        {blockNumStr} — {isDsa ? "DSA" : isDeepDive ? "Core Theory" : isCapstone ? "Capstone Build" : isRevEng ? "Reflections" : "Mock Practice"} ({blockDuration}m)
                       </span>
                       <h2 className={cn("text-sm font-bold text-foreground", task.completed && "line-through text-muted-foreground")}>
                         {task.title}
@@ -674,6 +688,20 @@ export default function TodayFocusPage() {
                         <HugeiconsIcon icon={CopyIcon} className="size-3.5" />
                         Copy Obsidian Markdown
                       </Button>
+                    </div>
+                  )}
+
+                  {/* Mock Specific content */}
+                  {isMock && (
+                    <div className="flex flex-col gap-4">
+                      <p>
+                        Set a timer to practice explaining weekly deep dive topics out loud, or conduct a whiteboard simulation. Pretend you are in a live technical round!
+                      </p>
+                      
+                      <div className="flex flex-col gap-4 bg-muted/20 p-5 rounded-xl border border-border/40 w-fit">
+                        <h3 className="font-semibold text-sm text-foreground uppercase tracking-wider font-mono">Mock Practice Timer</h3>
+                        <BlockTimer blockId={`${todayInfo.weekId}-mock-timer`} durationMinutes={5} blockTitle="Out Loud Concept Explanation" />
+                      </div>
                     </div>
                   )}
                 </CardContent>

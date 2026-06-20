@@ -5,7 +5,11 @@ import { AppState } from "../types";
 import { appReducer, Action } from "./reducer";
 import { initialAppState, extractDsaProblems } from "./initial-data";
 
-const LOCAL_STORAGE_KEY = "learning_tracker_state_v1";
+import { toast } from "sonner";
+
+const LOCAL_STORAGE_KEY_V1 = "learning_tracker_state_v1";
+const LOCAL_STORAGE_KEY_V2 = "learning_tracker_state_v2";
+const LOCAL_STORAGE_KEY_V3 = "learning_tracker_state_v3";
 
 interface StoreContextType {
   state: AppState;
@@ -27,7 +31,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Load data from localStorage on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (typeof window !== "undefined") {
+        if (localStorage.getItem(LOCAL_STORAGE_KEY_V1)) {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_V1);
+        }
+        if (localStorage.getItem(LOCAL_STORAGE_KEY_V2)) {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_V2);
+          setTimeout(() => {
+            toast.info("Study Plan Restructured", {
+              description: "Your study schedule has been updated to align with your semester class routine and starts on Saturday.",
+              duration: 6000,
+            });
+          }, 500);
+        }
+      }
+
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_V3);
       if (saved) {
         const parsed = JSON.parse(saved) as AppState;
         
@@ -46,7 +65,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isHydrated) return;
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(LOCAL_STORAGE_KEY_V3, JSON.stringify(state));
     } catch (e) {
       console.error("Failed to save state to local storage:", e);
     }
@@ -56,7 +75,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const dispatchWithReset = (action: Action) => {
     if (action.type === "RESET_STATE") {
       try {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        localStorage.removeItem(LOCAL_STORAGE_KEY_V3);
         // Force reload to reset state back to template
         window.location.reload();
       } catch (e) {

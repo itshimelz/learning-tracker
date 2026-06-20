@@ -72,13 +72,15 @@ export default function DashboardPage() {
 
   const todayTasks = React.useMemo(() => {
     if (!todayInfo.hasStarted || !currentWeekData) return [];
-    return currentWeekData.days[todayInfo.dayIndex]?.tasks || [];
-  }, [currentWeekData, todayInfo.hasStarted, todayInfo.dayIndex]);
+    const day = currentWeekData.days.find((d) => d.dayOfWeek === todayInfo.dayName);
+    return day?.tasks || [];
+  }, [currentWeekData, todayInfo.hasStarted, todayInfo.dayName]);
 
   const todayDayId = React.useMemo(() => {
     if (!todayInfo.hasStarted || !currentWeekData) return "";
-    return currentWeekData.days[todayInfo.dayIndex]?.id || "";
-  }, [currentWeekData, todayInfo.hasStarted, todayInfo.dayIndex]);
+    const day = currentWeekData.days.find((d) => d.dayOfWeek === todayInfo.dayName);
+    return day?.id || "";
+  }, [currentWeekData, todayInfo.hasStarted, todayInfo.dayName]);
 
   const todayDateStr = React.useMemo(() => {
     if (!todayInfo.hasStarted) return "";

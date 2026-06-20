@@ -126,11 +126,14 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
 
       {/* Week Day Grids */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {weekData.days.map((day, dayIndex) => {
-          const isRest = day.tasks.some((t) => t.category === "rest");
-          const isMock = dayIndex === 0;
-          const calDate = getCalendarDateFromIndex(state.settings.startDate, weekData.weekNumber, dayIndex);
+        {Array.from({ length: 7 }).map((_, dayIndex) => {
           const actualDayName = getDayNameFromIndex(state.settings.startDate, weekData.weekNumber, dayIndex);
+          const day = weekData.days.find((d) => d.dayOfWeek === actualDayName);
+          if (!day) return null;
+
+          const isRest = day.tasks.some((t) => t.category === "rest");
+          const hasMock = day.tasks.some((t) => t.category === "mock");
+          const calDate = getCalendarDateFromIndex(state.settings.startDate, weekData.weekNumber, dayIndex);
 
           return (
             <Card
@@ -153,7 +156,7 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
                   <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-wider font-mono">
                     Rest
                   </span>
-                ) : isMock ? (
+                ) : hasMock ? (
                   <span className="text-[9px] text-primary font-bold uppercase tracking-wider font-mono">
                     Mock Round
                   </span>
@@ -214,8 +217,8 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
                                 : task.category === "reverse-engineering"
                                   ? "Block 4 — Rev Eng"
                                   : task.category === "mock"
-                                    ? "Saturday Mock"
-                                    : "Sunday Rest"}
+                                    ? "Mock Round"
+                                    : "Rest"}
                         </span>
                       </div>
                     </div>
