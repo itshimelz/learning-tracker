@@ -148,7 +148,7 @@ export default function RoutinePage() {
               University Class Routine
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Semester: Summer 2026 • CSE Curriculum Graph
+              Semester: Summer 2026 • Sat→Fri Bangladesh Week
             </p>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function RoutinePage() {
         <div className="flex flex-col gap-1">
           <span className="font-bold text-foreground">Study Plan Integration</span>
           <p>
-            {formatMarkdown("Your Android Developer Study Plan is configured around this schedule. On class-heavy days (**Monday** and **Wednesday**), the Android workload is scaled down to a single timed **DSA** challenge (~45m). On free days (**Saturday**, **Sunday**, and **Friday**), the study plan scales up to full 4-block deep work sessions.")}
+            {formatMarkdown("Your Android Developer Study Plan now runs Saturday→Friday, matching the Bangladesh week. On class-heavy days (**Monday** 4 classes, **Wednesday** 2 classes + Lab), Android workload is **compressed** into evening blocks. On free days (**Saturday** and **Sunday**), the plan scales up to full 4-block deep work sessions. **Thursday** is your Mock Interview + FYP meeting day, and **Friday** (national holiday) is your full rest day.")}
           </p>
         </div>
       </div>
@@ -183,6 +183,11 @@ export default function RoutinePage() {
               >
                 <CardHeader className="p-3 border-b border-border/40 text-center">
                   <span className="text-xs font-bold text-foreground">{day}</span>
+                  {day === "Sat" && (
+                    <span className="text-[7px] text-primary font-mono font-bold uppercase tracking-widest mt-0.5 bg-primary/10 px-1.5 py-0.5 rounded-full border border-primary/20">
+                      Week Start
+                    </span>
+                  )}
                   {isWeekend && (
                     <span className="text-[8px] text-emerald-500 font-mono font-bold uppercase tracking-widest mt-0.5">
                       No Class

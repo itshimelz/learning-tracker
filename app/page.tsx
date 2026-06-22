@@ -11,6 +11,8 @@ import {
   ArrowRightIcon,
   CircleIcon,
   Tick01Icon,
+  Key01Icon,
+  GiftIcon,
 } from "@hugeicons/core-free-icons";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -108,16 +110,42 @@ export default function DashboardPage() {
     return day?.tasks || [];
   }, [currentWeekData, todayInfo.hasStarted, todayInfo.dayName]);
 
-  const todayDayId = React.useMemo(() => {
-    if (!todayInfo.hasStarted || !currentWeekData) return "";
-    const day = currentWeekData.days.find((d) => d.dayOfWeek === todayInfo.dayName);
-    return day?.id || "";
+  const todayDayData = React.useMemo(() => {
+    if (!todayInfo.hasStarted || !currentWeekData) return null;
+    return currentWeekData.days.find((d) => d.dayOfWeek === todayInfo.dayName) || null;
   }, [currentWeekData, todayInfo.hasStarted, todayInfo.dayName]);
+
+  const todayDayId = todayDayData?.id || "";
 
   const todayDateStr = React.useMemo(() => {
     if (!todayInfo.hasStarted) return "";
     return getCalendarDateFromIndex(state.settings.startDate, todayInfo.weekNumber, todayInfo.dayIndex);
   }, [state.settings.startDate, todayInfo.hasStarted, todayInfo.weekNumber, todayInfo.dayIndex]);
+
+  // Day-type block durations per template
+  const BLOCK_DURATIONS: Record<string, Record<string, string>> = {
+    Sat: { dsa: "45m", "deep-dive": "1h15m", capstone: "2h", "reverse-engineering": "30m", "course-study": "1h" },
+    Sun: { dsa: "45m", "deep-dive": "1h15m", capstone: "2h", "reverse-engineering": "30m", "course-study": "1h" },
+    Mon: { dsa: "30m", "deep-dive": "30m", capstone: "1h", "reverse-engineering": "15m", "course-study": "45m" },
+    Tue: { dsa: "45m", "deep-dive": "1h15m", capstone: "2h", "reverse-engineering": "30m", "course-study": "30m" },
+    Wed: { dsa: "45m", "deep-dive": "1h15m", capstone: "2h", "reverse-engineering": "30m", "course-study": "30m" },
+    Thu: { mock: "Mock", rest: "—" },
+    Fri: { rest: "—" },
+  };
+
+  // Day-type badge config
+  const DAY_TYPE_BADGES: Record<string, { label: string; color: string; dot: string }> = {
+    Sat: { label: "Free Day", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25", dot: "bg-emerald-500" },
+    Sun: { label: "Free Day", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25", dot: "bg-emerald-500" },
+    Mon: { label: "Heavy Class Day", color: "text-red-400 bg-red-500/10 border-red-500/25", dot: "bg-red-500" },
+    Tue: { label: "Medium Class Day", color: "text-amber-400 bg-amber-500/10 border-amber-500/25", dot: "bg-amber-500" },
+    Wed: { label: "Class + Lab Day", color: "text-orange-400 bg-orange-500/10 border-orange-500/25", dot: "bg-orange-500" },
+    Thu: { label: "Mock Day", color: "text-purple-400 bg-purple-500/10 border-purple-500/25", dot: "bg-purple-500" },
+    Fri: { label: "Rest Day", color: "text-zinc-400 bg-zinc-500/10 border-zinc-500/25", dot: "bg-zinc-500" },
+  };
+
+  const dayBadge = DAY_TYPE_BADGES[todayInfo.dayName] || { label: todayInfo.dayName, color: "text-primary bg-primary/10", dot: "bg-primary" };
+  const dayDurations = BLOCK_DURATIONS[todayInfo.dayName] || {};
 
   if (!isHydrated) {
     return (
@@ -327,8 +355,9 @@ export default function DashboardPage() {
             <CardHeader className="border-b border-border/40 pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-bold">Today&apos;s Focus Blocks</CardTitle>
-                <span className="text-[10px] uppercase font-bold font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                  {todayInfo.dayName}
+                <span className={cn("text-[10px] uppercase font-bold font-mono px-2.5 py-0.5 rounded-full border inline-flex items-center gap-1.5", dayBadge.color)}>
+                  <span className={cn("size-1.5 rounded-full shrink-0", dayBadge.dot)} />
+                  {dayBadge.label}
                 </span>
               </div>
               <CardDescription className="text-xs flex items-center justify-between mt-1">
@@ -370,59 +399,82 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3.5">
-                  {todayTasks.map((task, index) => (
-                    <div
-                      key={task.id}
-                      className={cn(
-                        "flex items-start gap-3 p-3 rounded-lg border transition-all duration-300",
-                        task.completed
-                          ? "bg-muted/40 border-border/50 opacity-80"
-                          : "bg-background/40 border-border/70 hover:border-primary/40"
-                      )}
-                    >
-                      <Checkbox
-                        id={task.id}
-                        checked={task.completed}
-                        onCheckedChange={() =>
-                          dispatch({
-                            type: "TOGGLE_TASK",
-                            payload: {
-                              weekId: todayInfo.weekId,
-                              dayId: todayDayId,
-                              taskId: task.id,
-                            },
-                          })
-                        }
-                        className="mt-0.5 shrink-0"
-                      />
+                  {/* Start Trigger Banner */}
+                  {todayDayData?.startTrigger && (
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-amber-500/25 bg-amber-500/5 backdrop-blur-xs">
+                      <HugeiconsIcon icon={Key01Icon} className="size-4 text-amber-400 shrink-0 mt-0.5" />
                       <div className="flex flex-col gap-0.5 leading-tight">
-                        <label
-                          htmlFor={task.id}
-                          className={cn(
-                            "text-xs font-semibold cursor-pointer select-none",
-                            task.completed ? "text-muted-foreground line-through" : "text-foreground"
-                          )}
-                        >
-                          {formatMarkdown(task.title)}
-                        </label>
-                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
-                          Block {index + 1} — {
-                            task.category === "dsa"
-                              ? "DSA (45m)"
-                              : task.category === "deep-dive"
-                                ? "Core Deep Dive (1h15m)"
-                                : task.category === "capstone"
-                                  ? "Capstone (2h)"
-                                  : task.category === "reverse-engineering"
-                                    ? "Rev Eng (30m)"
-                                    : task.category === "mock"
-                                      ? "Mock Practice (45m)"
-                                      : "Rest (0m)"
-                          }
-                        </span>
+                        <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider font-mono">Start Trigger</span>
+                        <span className="text-xs text-foreground font-medium">{todayDayData.startTrigger}</span>
                       </div>
                     </div>
-                  ))}
+                  )}
+
+                  {todayTasks.map((task, index) => {
+                     const duration = dayDurations[task.category] || "";
+                     const categoryLabel =
+                       task.category === "dsa" ? "DSA"
+                       : task.category === "deep-dive" ? "Core Deep Dive"
+                       : task.category === "capstone" ? "Capstone"
+                       : task.category === "reverse-engineering" ? "Rev Eng"
+                       : task.category === "course-study" ? "Course Study"
+                       : task.category === "mock" ? "Mock Practice"
+                       : "Rest";
+                     const blockLabel = duration ? `${categoryLabel} (${duration})` : categoryLabel;
+
+                    return (
+                      <div
+                        key={task.id}
+                        className={cn(
+                          "flex items-start gap-3 p-3 rounded-lg border transition-all duration-300",
+                          task.completed
+                            ? "bg-muted/40 border-border/50 opacity-80"
+                            : "bg-background/40 border-border/70 hover:border-primary/40"
+                        )}
+                      >
+                        <Checkbox
+                          id={task.id}
+                          checked={task.completed}
+                          onCheckedChange={() =>
+                            dispatch({
+                              type: "TOGGLE_TASK",
+                              payload: {
+                                weekId: todayInfo.weekId,
+                                dayId: todayDayId,
+                                taskId: task.id,
+                              },
+                            })
+                          }
+                          className="mt-0.5 shrink-0"
+                        />
+                        <div className="flex flex-col gap-0.5 leading-tight">
+                          <label
+                            htmlFor={task.id}
+                            className={cn(
+                              "text-xs font-semibold cursor-pointer select-none",
+                              task.completed ? "text-muted-foreground line-through" : "text-foreground"
+                            )}
+                          >
+                            {formatMarkdown(task.title)}
+                          </label>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
+                            Block {index + 1} — {blockLabel}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Reward Banner */}
+                  {todayDayData?.reward && (
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-emerald-500/25 bg-emerald-500/5 backdrop-blur-xs">
+                      <HugeiconsIcon icon={GiftIcon} className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div className="flex flex-col gap-0.5 leading-tight">
+                        <span className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider font-mono">Reward</span>
+                        <span className="text-xs text-foreground font-medium">{todayDayData.reward}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

@@ -6,9 +6,9 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeftIcon,
   Tick01Icon,
-  CircleIcon,
-  BadgeCheckIcon,
   Task02Icon,
+  Key01Icon,
+  GiftIcon,
 } from "@hugeicons/core-free-icons";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -132,8 +132,19 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
           if (!day) return null;
 
           const isRest = day.tasks.some((t) => t.category === "rest");
-          const hasMock = day.tasks.some((t) => t.category === "mock");
           const calDate = getCalendarDateFromIndex(state.settings.startDate, weekData.weekNumber, dayIndex);
+
+          // Day-type color coding matching curriculum page
+          const dayTypeConfig: Record<string, { color: string; label: string; dot: string }> = {
+            Sat: { color: "text-emerald-400", label: "Free Day", dot: "bg-emerald-500" },
+            Sun: { color: "text-emerald-400", label: "Free Day", dot: "bg-emerald-500" },
+            Mon: { color: "text-rose-400", label: "Heavy Class", dot: "bg-rose-500" },
+            Tue: { color: "text-amber-400", label: "Medium Class", dot: "bg-amber-500" },
+            Wed: { color: "text-amber-400", label: "Class + Lab", dot: "bg-orange-500" },
+            Thu: { color: "text-purple-400", label: "Mock Day", dot: "bg-purple-500" },
+            Fri: { color: "text-gray-400", label: "Rest Day", dot: "bg-zinc-500" },
+          };
+          const dayType = dayTypeConfig[actualDayName] ?? { color: "text-muted-foreground", label: "Study Day" };
 
           return (
             <Card
@@ -143,26 +154,24 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
                 day.tasks.every((t) => t.completed) && "border-border/30 bg-muted/10 opacity-90"
               )}
             >
-              <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-sm font-bold text-foreground">{actualDayName}</CardTitle>
-                  {calDate && (
-                    <span className="text-[9px] text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded-sm font-semibold">
-                      {calDate}
-                    </span>
-                  )}
+              <CardHeader className="border-b border-border/40 pb-3 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-sm font-bold text-foreground">{actualDayName}</CardTitle>
+                    {calDate && (
+                      <span className="text-[9px] text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded-sm font-semibold">
+                        {calDate}
+                      </span>
+                    )}
+                  </div>
+                  <span className={cn("text-[9px] font-bold uppercase tracking-wider font-mono inline-flex items-center gap-1.5", dayType.color)}>
+                    <span className={cn("size-1.5 rounded-full shrink-0", dayType.dot)} />
+                    {dayType.label}
+                  </span>
                 </div>
-                {isRest ? (
-                  <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-wider font-mono">
-                    Rest
-                  </span>
-                ) : hasMock ? (
-                  <span className="text-[9px] text-primary font-bold uppercase tracking-wider font-mono">
-                    Mock Round
-                  </span>
-                ) : (
-                  <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider font-mono">
-                    Study Day
+                {day.blockType && (
+                  <span className="text-[9px] text-muted-foreground/70 font-medium font-mono bg-muted/50 px-2 py-0.5 rounded-sm w-fit">
+                    {day.blockType}
                   </span>
                 )}
               </CardHeader>
@@ -218,14 +227,32 @@ export default function WeekDetailPage({ params }: WeekDetailPageProps) {
                                 ? "Block 3 — Capstone"
                                 : task.category === "reverse-engineering"
                                   ? "Block 4 — Rev Eng"
-                                  : task.category === "mock"
-                                    ? "Mock Round"
-                                    : "Rest"}
+                                  : task.category === "course-study"
+                                    ? "Course"
+                                    : task.category === "mock"
+                                      ? "Mock Round"
+                                      : "Rest"}
                         </span>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* Start Trigger */}
+                {day.startTrigger && day.startTrigger !== "No trigger" && (
+                  <p className="text-[10px] text-muted-foreground/80 italic leading-relaxed px-1 flex items-center gap-1.5">
+                    <HugeiconsIcon icon={Key01Icon} className="size-3 text-amber-500 shrink-0" />
+                    {day.startTrigger}
+                  </p>
+                )}
+
+                {/* Reward */}
+                {day.reward && (
+                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed px-1 flex items-center gap-1.5">
+                    <HugeiconsIcon icon={GiftIcon} className="size-3 text-emerald-500 shrink-0" />
+                    {day.reward}
+                  </p>
+                )}
               </CardContent>
 
               {/* Day Study Workspace Quick Link */}

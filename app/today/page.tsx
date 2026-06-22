@@ -18,6 +18,11 @@ import {
   ZapIcon,
   LeetcodeIcon,
   Calendar03Icon,
+  Key01Icon,
+  GiftIcon,
+  GraduationCapIcon,
+  BookOpen02Icon,
+  CircleIcon,
 } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
@@ -26,12 +31,120 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/lib/store/context";
 import { useTimer } from "@/lib/store/timer-context";
 import { useProgressCalc } from "@/hooks/use-progress-calc";
 import { cn, getCalendarDateFromIndex, getDayNameFromIndex, formatMarkdown } from "@/lib/utils";
+import type { Task } from "@/lib/types";
 
+// ─────────────────────────────────────────────
+// Helper: Dynamic block durations per day type
+// ─────────────────────────────────────────────
+type DayName = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
+
+function getBlockDuration(dayName: DayName, category: Task["category"]): number {
+  switch (dayName) {
+    case "Sat":
+    case "Sun":
+      switch (category) {
+        case "dsa": return 45;
+        case "deep-dive": return 75;
+        case "capstone": return 120;
+        case "reverse-engineering": return 30;
+        case "course-study": return 60;
+        default: return 0;
+      }
+    case "Mon":
+      switch (category) {
+        case "dsa": return 30;
+        case "deep-dive": return 30;
+        case "capstone": return 60;
+        case "reverse-engineering": return 15;
+        case "course-study": return 45;
+        default: return 0;
+      }
+    case "Tue":
+    case "Wed":
+      switch (category) {
+        case "dsa": return 45;
+        case "deep-dive": return 75;
+        case "capstone": return 120;
+        case "reverse-engineering": return 30;
+        case "course-study": return 30;
+        default: return 0;
+      }
+    case "Thu":
+      switch (category) {
+        case "mock": return 45;
+        case "course-study": return 30;
+        default: return 0;
+      }
+    case "Fri":
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Helper: Category label with emoji
+// ─────────────────────────────────────────────
+function getCategoryLabel(category: Task["category"]): string {
+  switch (category) {
+    case "dsa": return "DSA";
+    case "deep-dive": return "Core Theory";
+    case "capstone": return "Capstone Build";
+    case "reverse-engineering": return "Reflections";
+    case "course-study": return "Course Study";
+    case "mock": return "Mock Practice";
+    case "rest": return "Rest";
+    default: return category;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Helper: Category Icon
+// ─────────────────────────────────────────────
+function CategoryIcon({ category, className }: { category: Task["category"]; className?: string }) {
+  let icon = CircleIcon;
+  switch (category) {
+    case "dsa": icon = LeetcodeIcon; break;
+    case "deep-dive": icon = BookOpen02Icon; break;
+    case "capstone": icon = ShieldIcon; break;
+    case "reverse-engineering": icon = RefreshIcon; break;
+    case "course-study": icon = GraduationCapIcon; break;
+    case "mock": icon = BadgeCheckIcon; break;
+    default: icon = CircleIcon; break;
+  }
+  return <HugeiconsIcon icon={icon} className={cn("size-3 shrink-0", className)} />;
+}
+
+// ─────────────────────────────────────────────
+// Helper: Day type badge color scheme
+// ─────────────────────────────────────────────
+function getDayTypeColor(dayName: DayName): { bg: string; text: string; border: string; dot: string } {
+  switch (dayName) {
+    case "Sat":
+    case "Sun":
+      return { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", dot: "bg-emerald-500" };
+    case "Mon":
+      return { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20", dot: "bg-rose-500" };
+    case "Tue":
+    case "Wed":
+      return { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20", dot: "bg-amber-500" };
+    case "Thu":
+      return { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", dot: "bg-purple-500" };
+    case "Fri":
+      return { bg: "bg-zinc-500/10", text: "text-zinc-400", border: "border-zinc-500/20", dot: "bg-zinc-500" };
+    default:
+      return { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" };
+  }
+}
+
+// ─────────────────────────────────────────────
 // Pomodoro Timer Subcomponent
+// ─────────────────────────────────────────────
 interface BlockTimerProps {
   blockId: string;
   durationMinutes: number;
@@ -105,6 +218,87 @@ function BlockTimer({ blockId, durationMinutes, blockTitle }: BlockTimerProps) {
   );
 }
 
+// ─────────────────────────────────────────────
+// Start Trigger Card
+// ─────────────────────────────────────────────
+function StartTriggerCard({ trigger }: { trigger: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] backdrop-blur-xl p-5 transition-all duration-500 hover:border-emerald-500/30 hover:bg-emerald-500/[0.06]">
+      {/* Decorative glow */}
+      <div className="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-8 -left-8 size-24 rounded-full bg-primary/5 blur-2xl" />
+
+      <div className="relative flex items-start gap-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 shadow-sm">
+          <HugeiconsIcon icon={Key01Icon} className="size-5" />
+        </div>
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80 font-mono">
+              2-Minute Start Trigger
+            </span>
+            <div className="h-px flex-1 bg-emerald-500/10" />
+          </div>
+          <p className="text-sm font-medium text-foreground/90 leading-relaxed">
+            {formatMarkdown(trigger)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Reward Card
+// ─────────────────────────────────────────────
+function RewardCard({ reward }: { reward: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/[0.04] via-orange-500/[0.03] to-rose-500/[0.02] backdrop-blur-xl p-5 transition-all duration-500 hover:border-amber-500/30 hover:from-amber-500/[0.06] hover:via-orange-500/[0.05] hover:to-rose-500/[0.03]">
+      {/* Decorative glow */}
+      <div className="pointer-events-none absolute -top-10 -right-10 size-28 rounded-full bg-amber-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-6 -left-6 size-20 rounded-full bg-orange-500/8 blur-2xl" />
+
+      <div className="relative flex items-start gap-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/20 shadow-sm">
+          <HugeiconsIcon icon={GiftIcon} className="size-5" />
+        </div>
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80 font-mono">
+              Today&apos;s Reward
+            </span>
+            <div className="h-px flex-1 bg-amber-500/10" />
+          </div>
+          <p className="text-sm font-medium text-foreground/90 leading-relaxed">
+            {formatMarkdown(reward)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Day Type Badge
+// ─────────────────────────────────────────────
+function DayTypeBadge({ dayName, blockType }: { dayName: DayName; blockType?: string }) {
+  const colors = getDayTypeColor(dayName);
+  const label = blockType || dayName;
+
+  return (
+    <span className={cn(
+      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono tracking-wide border transition-all duration-200",
+      colors.bg, colors.text, colors.border
+    )}>
+      <span className={cn("size-1.5 rounded-full shrink-0", colors.dot)} />
+      {label}
+    </span>
+  );
+}
+
+// ═════════════════════════════════════════════
+// Main Page Component
+// ═════════════════════════════════════════════
 export default function TodayFocusPage() {
   const { state, dispatch, isHydrated } = useStore();
   const progress = useProgressCalc();
@@ -194,7 +388,7 @@ export default function TodayFocusPage() {
     result: "",
   });
 
-  const selectedDayName = orderedWeekDayNames[selectedDayIndex] || "Sat";
+  const selectedDayName = (orderedWeekDayNames[selectedDayIndex] || "Sat") as DayName;
 
   const copyStarToClipboard = (dsaTitle: string, deepDiveTitle: string) => {
     const md = `# Obsidian Engineering Journal Entry — Week ${todayInfo.weekNumber} ${selectedDayName}
@@ -343,54 +537,64 @@ export default function TodayFocusPage() {
           </h1>
         </div>
 
-        {/* Date Selector Row */}
-        <div className="flex items-center gap-1.5 border border-border bg-card/20 p-1 rounded-lg w-fit">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevDay}
-            disabled={selectedDayIndex === 0}
-            className="size-8 rounded-md"
-          >
-            <HugeiconsIcon icon={ArrowLeftIcon} className="size-4" />
-          </Button>
-          
-          <div className="flex items-center gap-1">
-            {orderedWeekDayNames.map((dayName, idx) => {
-              const isSelected = selectedDayIndex === idx;
-              const isCompleted = isSelectedDayCompleted(idx);
-              return (
-                <button
-                  key={dayName + idx}
-                  onClick={() => setSelectedDayIndex(idx)}
-                  className={cn(
-                    "h-8 px-2.5 rounded-md text-xs font-semibold font-mono relative transition-all duration-200 focus:outline-hidden",
-                    isSelected
-                      ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    isCompleted && !isSelected && "text-emerald-500 hover:text-emerald-600"
-                  )}
-                >
-                  {dayName}
-                  {isCompleted && (
-                    <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-500 border border-background" />
-                  )}
-                </button>
-              );
-            })}
+        {/* Date Selector Row + Day Type Badge */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 border border-border bg-card/20 p-1 rounded-lg w-fit">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePrevDay}
+              disabled={selectedDayIndex === 0}
+              className="size-8 rounded-md"
+            >
+              <HugeiconsIcon icon={ArrowLeftIcon} className="size-4" />
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {orderedWeekDayNames.map((dayName, idx) => {
+                const isSelected = selectedDayIndex === idx;
+                const isCompleted = isSelectedDayCompleted(idx);
+                return (
+                  <button
+                    key={dayName + idx}
+                    onClick={() => setSelectedDayIndex(idx)}
+                    className={cn(
+                      "h-8 px-2.5 rounded-md text-xs font-semibold font-mono relative transition-all duration-200 focus:outline-hidden",
+                      isSelected
+                        ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      isCompleted && !isSelected && "text-emerald-500 hover:text-emerald-600"
+                    )}
+                  >
+                    {dayName}
+                    {isCompleted && (
+                      <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-500 border border-background" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNextDay}
+              disabled={selectedDayIndex === 6}
+              className="size-8 rounded-md"
+            >
+              <HugeiconsIcon icon={ArrowRightIcon} className="size-4" />
+            </Button>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNextDay}
-            disabled={selectedDayIndex === 6}
-            className="size-8 rounded-md"
-          >
-            <HugeiconsIcon icon={ArrowRightIcon} className="size-4" />
-          </Button>
+          {/* Day Type Badge */}
+          <DayTypeBadge dayName={selectedDayName} blockType={selectedDayData?.blockType} />
         </div>
       </div>
+
+      {/* Start Trigger Card */}
+      {selectedDayData?.startTrigger && !isRestOnlyDay && (
+        <StartTriggerCard trigger={selectedDayData.startTrigger} />
+      )}
 
       {/* Weekend Checkpoint Views */}
       {isMockOnlyDay ? (
@@ -405,7 +609,7 @@ export default function TodayFocusPage() {
               </span>
               <h2 className="text-lg font-bold text-foreground">Weekly Whiteboard & Mock Interview Prep</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Practice whiteboard simulations, timed problem solving, and explain concepts out loud.
+                Practice whiteboard simulations, timed problem solving, and explain concepts out loud. Includes FYP prep review.
               </p>
             </div>
           </div>
@@ -445,6 +649,10 @@ export default function TodayFocusPage() {
                       >
                         {formatMarkdown(task.title)}
                       </label>
+                      <span className="text-[9px] text-muted-foreground font-mono flex items-center gap-1.5">
+                        <CategoryIcon category={task.category} />
+                        {getCategoryLabel(task.category)} · {getBlockDuration(selectedDayName, task.category)}m
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -459,6 +667,11 @@ export default function TodayFocusPage() {
               <BlockTimer blockId={`${todayInfo.weekId}-mock-timer`} durationMinutes={5} blockTitle="Out Loud Concept Explanation" />
             </div>
           </div>
+
+          {/* Reward card for mock day */}
+          {selectedDayData?.reward && (
+            <RewardCard reward={selectedDayData.reward} />
+          )}
         </Card>
       ) : isRestOnlyDay ? (
         <Card className="bg-card/20 border-border/80 p-6 flex flex-col gap-4 text-center items-center py-12 max-w-xl mx-auto">
@@ -466,11 +679,11 @@ export default function TodayFocusPage() {
             <HugeiconsIcon icon={BadgeCheckIcon} className="size-8" />
           </div>
           <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-bold text-foreground">Rest & Light Review Day</h2>
-            <p className="text-xs text-muted-foreground font-mono mt-0.5">{selectedDayName} schedule</p>
+            <h2 className="text-xl font-bold text-foreground">Rest & Recovery Day</h2>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{selectedDayName} · National holiday</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed mt-2 max-w-sm">
-            Take a break! Rest is crucial for memory consolidation. Re-skim the notes you took in Obsidian this week, but do not study any new material.
+            Take a break! Rest is crucial for memory consolidation. Re-skim the notes you took in Obsidian this week, but do not study any new material. Your brain is encoding everything you learned.
           </p>
           {selectedDayData?.tasks.map((task) => (
             <div key={task.id} className="flex items-center gap-3 mt-4">
@@ -489,20 +702,28 @@ export default function TodayFocusPage() {
               </label>
             </div>
           ))}
+
+          {/* Reward card for rest day */}
+          {selectedDayData?.reward && (
+            <div className="mt-4 w-full max-w-sm">
+              <RewardCard reward={selectedDayData.reward} />
+            </div>
+          )}
         </Card>
       ) : (
         /* Weekday Study Block Cards */
         <div className="flex flex-col gap-6">
           {selectedDayData?.tasks.map((task, index) => {
-            // Determine content based on block index
+            // Determine content based on block category
             const isDsa = task.category === "dsa";
             const isDeepDive = task.category === "deep-dive";
             const isCapstone = task.category === "capstone";
             const isRevEng = task.category === "reverse-engineering";
+            const isCourseStudy = task.category === "course-study";
             const isMock = task.category === "mock";
 
-            // Grab study blocks duration
-            const blockDuration = isDsa ? 45 : isDeepDive ? 75 : isCapstone ? 120 : isMock ? 45 : 30;
+            // Dynamic block duration based on day type
+            const blockDuration = getBlockDuration(selectedDayName, task.category);
             const blockNumStr = `Block ${index + 1}`;
             
             // Collect titles for Obsidian clipboards
@@ -530,15 +751,16 @@ export default function TodayFocusPage() {
                       className="mt-1"
                     />
                     <div className="flex flex-col gap-0.5 leading-snug">
-                      <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-mono">
-                        {blockNumStr} — {isDsa ? "DSA" : isDeepDive ? "Core Theory" : isCapstone ? "Capstone Build" : isRevEng ? "Reflections" : "Mock Practice"} ({blockDuration}m)
+                      <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                        <CategoryIcon category={task.category} />
+                        {blockNumStr} — {getCategoryLabel(task.category)} ({blockDuration}m)
                       </span>
                       <h2 className={cn("text-sm font-bold text-foreground", task.completed && "line-through text-muted-foreground")}>
                         {formatMarkdown(task.title)}
                       </h2>
                     </div>
                   </div>
-                  {!isRevEng && <BlockTimer blockId={task.id} durationMinutes={blockDuration} blockTitle={task.title} />}
+                  {!isRevEng && blockDuration > 0 && <BlockTimer blockId={task.id} durationMinutes={blockDuration} blockTitle={task.title} />}
                 </CardHeader>
 
                 <CardContent className="pt-4 text-xs text-muted-foreground leading-relaxed">
@@ -546,7 +768,7 @@ export default function TodayFocusPage() {
                   {isDsa && (
                     <div className="flex flex-col gap-4">
                       <p>
-                        Solve today&apos;s DSA task in clean Kotlin. Set a timer, solve it under 45 minutes, and verify correctness before referencing answers.
+                        Solve today&apos;s DSA task in clean Kotlin. Set a timer, solve it under {blockDuration} minutes, and verify correctness before referencing answers.
                       </p>
                       <div className="flex gap-2">
                         <Button
@@ -633,6 +855,15 @@ export default function TodayFocusPage() {
                     </div>
                   )}
 
+                  {/* Course Study Specific content */}
+                  {isCourseStudy && (
+                    <div className="flex flex-col gap-3">
+                      <p>
+                        Review university course material, complete assignments, or prepare for upcoming class topics. Focus on areas that overlap with your interview prep track.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Reverse Engineering Obsidian Form */}
                   {isRevEng && (
                     <div className="flex flex-col gap-4 pt-1">
@@ -708,6 +939,11 @@ export default function TodayFocusPage() {
               </Card>
             );
           })}
+
+          {/* Reward Card — shown at the bottom of all study blocks */}
+          {selectedDayData?.reward && (
+            <RewardCard reward={selectedDayData.reward} />
+          )}
         </div>
       )}
     </div>

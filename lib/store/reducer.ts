@@ -54,7 +54,7 @@ export function appReducer(state: AppState, action: Action): AppState {
       });
 
       // Also auto-toggle the corresponding DSA problem if a DSA task is toggled
-      let updatedDsaProblems = [...state.dsaProblems];
+      const updatedDsaProblems = [...state.dsaProblems];
       const targetTask = state.plan.months
         .flatMap((m) => m.weeks)
         .find((w) => w.id === weekId)

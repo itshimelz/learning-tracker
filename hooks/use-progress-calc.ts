@@ -36,6 +36,7 @@ export function useProgressCalc(): ProgressSummary {
       "deep-dive": { percent: 0, completed: 0, total: 0 },
       "capstone": { percent: 0, completed: 0, total: 0 },
       "reverse-engineering": { percent: 0, completed: 0, total: 0 },
+      "course-study": { percent: 0, completed: 0, total: 0 },
       "mock": { percent: 0, completed: 0, total: 0 },
       "rest": { percent: 0, completed: 0, total: 0 },
     };

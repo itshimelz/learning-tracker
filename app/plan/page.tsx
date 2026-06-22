@@ -10,6 +10,8 @@ import {
   BadgeCheckIcon,
   ArrowRightIcon,
   Task02Icon,
+  Key01Icon,
+  GiftIcon,
 } from "@hugeicons/core-free-icons";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -154,9 +156,21 @@ export default function FullPlanPage() {
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                           {week.days.map((day, dayIndex) => {
                             const isRest = day.tasks.some((t) => t.category === "rest");
-                            const isMock = dayIndex === 0;
+                            const isMock = day.tasks.some((t) => t.category === "mock");
                             const calDate = getCalendarDateFromIndex(state.settings.startDate, week.weekNumber, dayIndex);
                             const actualDayName = getDayNameFromIndex(state.settings.startDate, week.weekNumber, dayIndex);
+
+                            // Day type badge config based on day of week
+                            const dayTypeConfig: Record<string, { classes: string; label: string; dot: string }> = {
+                              Sat: { classes: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25", label: "Free Day", dot: "bg-emerald-500" },
+                              Sun: { classes: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25", label: "Free Day", dot: "bg-emerald-500" },
+                              Mon: { classes: "bg-rose-500/10 text-rose-500 border-rose-500/25", label: "Heavy Class", dot: "bg-rose-500" },
+                              Tue: { classes: "bg-amber-500/10 text-amber-500 border-amber-500/25", label: "Medium Class", dot: "bg-amber-500" },
+                              Wed: { classes: "bg-amber-500/10 text-amber-500 border-amber-500/25", label: "Class + Lab", dot: "bg-orange-500" },
+                              Thu: { classes: "bg-purple-500/10 text-purple-500 border-purple-500/25", label: "Mock Day", dot: "bg-purple-500" },
+                              Fri: { classes: "bg-gray-500/10 text-gray-500 border-gray-500/25", label: "Rest Day", dot: "bg-zinc-500" },
+                            };
+                            const dayType = dayTypeConfig[day.dayOfWeek] || dayTypeConfig["Sat"];
 
                             return (
                               <div
@@ -178,19 +192,13 @@ export default function FullPlanPage() {
                                       </span>
                                     )}
                                   </div>
-                                  {isRest ? (
-                                    <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-wider font-mono">
-                                      Rest
-                                    </span>
-                                  ) : isMock ? (
-                                    <span className="text-[9px] text-primary font-bold uppercase tracking-wider font-mono">
-                                      Mock Round
-                                    </span>
-                                  ) : (
-                                    <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider font-mono">
-                                      Study Day
-                                    </span>
-                                  )}
+                                  <span className={cn(
+                                    "text-[9px] font-bold tracking-wider font-mono px-2 py-0.5 rounded-full border inline-flex items-center gap-1.5",
+                                    dayType.classes
+                                  )}>
+                                    <span className={cn("size-1.5 rounded-full shrink-0", dayType.dot)} />
+                                    {dayType.label}
+                                  </span>
                                 </div>
 
                                 {/* Task Rows */}
@@ -236,14 +244,32 @@ export default function FullPlanPage() {
                                                 ? "Capstone"
                                                 : task.category === "reverse-engineering"
                                                   ? "Rev Eng"
-                                                  : task.category === "mock"
-                                                    ? "Mock Round"
-                                                    : "Rest"}
+                                                  : task.category === "course-study"
+                                                    ? "Course"
+                                                    : task.category === "mock"
+                                                      ? "Mock Round"
+                                                      : "Rest"}
                                         </span>
                                       </div>
                                     </div>
                                   ))}
                                 </div>
+
+                                {/* Start Trigger */}
+                                {day.startTrigger && day.startTrigger !== "No trigger" && (
+                                  <p className="text-[10px] text-muted-foreground italic leading-relaxed mt-1.5 flex items-center gap-1.5">
+                                    <HugeiconsIcon icon={Key01Icon} className="size-3 text-amber-500 shrink-0" />
+                                    &ldquo;{day.startTrigger}&rdquo;
+                                  </p>
+                                )}
+
+                                {/* Reward */}
+                                {day.reward && (
+                                  <p className="text-[10px] text-muted-foreground leading-relaxed mt-1 flex items-center gap-1.5">
+                                    <HugeiconsIcon icon={GiftIcon} className="size-3 text-emerald-500 shrink-0" />
+                                    {day.reward}
+                                  </p>
+                                )}
 
                                 {/* Open Day Detail Link */}
                                 <Button

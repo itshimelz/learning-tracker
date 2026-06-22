@@ -18,14 +18,17 @@ export interface Week {
 }
 
 export interface Day {
-  id: string;              // "week-1-day-mon"
+  id: string;              // "week-1-day-sat"
   dayOfWeek: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
   tasks: Task[];
+  startTrigger?: string;   // v3: daily 2-minute start trigger text
+  reward?: string;         // v3: daily reward after completing blocks
+  blockType?: string;      // v3: daily template label (e.g. "Free day — full prep block")
 }
 
 export interface Task {
   id: string;
-  category: 'dsa' | 'deep-dive' | 'capstone' | 'reverse-engineering' | 'mock' | 'rest';
+  category: 'dsa' | 'deep-dive' | 'capstone' | 'reverse-engineering' | 'course-study' | 'mock' | 'rest';
   title: string;
   description?: string;
   completed: boolean;
